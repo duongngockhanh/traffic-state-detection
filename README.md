@@ -16,6 +16,8 @@
 + Huấn luyện mô hình phát hiện thêm cả lane, vẽ được nhiều region có độ dài bằng nhau bằng mỗi 2 lane.
 + Từ đó, có thể tính được vận tốc trên mỗi region.
 + Kết quả: Không thành công.
+
+https://user-images.githubusercontent.com/87640587/225799612-3cee09ef-9c7d-4fc1-9513-e1f9c1116633.mp4
 ### Ý tưởng 2.2: Tạo thủ công 1 region để đo tốc độ trong region đó
 + Nhược điểm: Không khách quan, do xe phải đi qua region mới có thể phát hiện tốc độ.
 ### Ý tưởng 2.3: Sử dụng Bird Eye View Transformation
