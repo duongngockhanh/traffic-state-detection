@@ -7,7 +7,7 @@ names = ['bus', 'car', 'lane', 'person', 'trailer', 'truck', 'bike']
 instance_count = [0]*len(names) 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--src", type=str)
+parser.add_argument("-s", "--src", type=str)
 opt = parser.parse_args()
 src = opt.src
 

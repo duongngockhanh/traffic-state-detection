@@ -5,14 +5,16 @@ import shutil
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--src", "-s", type=str, required=True, help='source folder')
-parser.add_argument("--dst", "-d", type=str, required=True, help='destination folder')
-parser.add_argument("--train_ratio", type=str, required=True, help='train ratio for splitting dataset')
-parser.add_argument("--val_ratio", type=str, required=True, help='val ration for splitting dataset')
+parser.add_argument("-s", "--src", type=str, required=True, help='source folder')
+parser.add_argument("-d", "--dst", type=str, required=True, help='destination folder')
+parser.add_argument("-t", "--train_ratio", type=str, required=True, help='train ratio for splitting dataset')
+parser.add_argument("-v", "--val_ratio", type=str, required=True, help='val ration for splitting dataset')
 opt = parser.parse_args()
 
 src_folder = opt.src
 dst_folder = opt.dst
+train_ratio = float(opt.train_ratio)
+val_ratio = float(opt.val_ratio)
 
 pairs = []
 
@@ -26,8 +28,8 @@ for i in os.listdir(src_folder):
 
 random.shuffle(pairs)
 
-train_size = int(opt.train_ratio * len(pairs))
-val_size = int(opt.val_ratio * len(pairs))
+train_size = int(train_ratio * len(pairs))
+val_size = int(val_ratio * len(pairs))
 test_size = len(pairs) - train_size - val_size
 
 train_data = pairs[:train_size]
