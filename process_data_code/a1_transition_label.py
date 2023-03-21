@@ -3,8 +3,8 @@ import os.path as osp
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--format", type=str)
-parser.add_argument("--src", type=str)
+parser.add_argument("-f", "--format", type=str)
+parser.add_argument("-s", "--src", type=str)
 opt = parser.parse_args()
 format = opt.format
 src = opt.src
@@ -18,16 +18,16 @@ if format == "yolo":
             with open(os.path.join(directory_path, filename), 'r') as file:
                 for line in file:
                     a = line.strip().split() # a: list phân tách cách thành phần của một dòng
-                    if a[0] == '1':
-                        a[0] = '0'
-                    elif a[0] == '0':
-                        a[0] = '1'
-                    elif a[0] == '3':
-                        a[0] = '6'
-                    elif a[0] == '4':
-                        a[0] = '5'
-                    elif a[0] == '6':
-                        a[0] = '4'
+                    if a[0] == '6':
+                        a[0] = '2'
+                    # elif a[0] == '0':
+                    #     a[0] = '1'
+                    # elif a[0] == '3':
+                    #     a[0] = '6'
+                    # elif a[0] == '4':
+                    #     a[0] = '5'
+                    # elif a[0] == '6':
+                    #     a[0] = '4'
                     b = ' '.join(a) # b: yolo annotation string line, sau gộp từ list a
                     file_da_sua.append(b)
             with open(os.path.join(directory_path, filename), 'w') as file:
