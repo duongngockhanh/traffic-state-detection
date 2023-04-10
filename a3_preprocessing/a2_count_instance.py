@@ -3,11 +3,11 @@ import os.path as osp
 import argparse
 
 # Chỉnh sửa tên và thứ tự các class
-names = ['bus', 'car', 'lane', 'person', 'trailer', 'truck', 'bike']
+names = ['car', 'bike', 'bus', 'truck']
 instance_count = [0]*len(names) 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-s", "--src", type=str)
+parser.add_argument("--src", "-s", type=str, help="path to folder to be analysed")
 opt = parser.parse_args()
 src = opt.src
 
@@ -40,5 +40,5 @@ else:
                     count = int(a[0])
                     instance_count[count] += 1
 
-for i in range(7):
+for i in range(len(names)):
     print(names[i] + ": " + str(instance_count[i]))
