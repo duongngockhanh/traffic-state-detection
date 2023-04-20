@@ -1,1 +1,1 @@
-python detect.py --weights a2_weights/vehicle_v5n.pt --source a1_data_test/output_video.mp4 --view-img
+python detect.py --weights a2_weights/yolov5n_bigger_dataset.pt --source a1_video_test/a0500000300.mp4 --view-img

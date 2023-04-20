@@ -65,8 +65,6 @@ def isInside(points, centroid):
 
 points = []
 
-
-
 # xu ly click chuot
 def handle_left_click(event, x, y, flag, points):
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -113,6 +111,12 @@ def run(
     screenshot = source.lower().startswith('screen')
     if is_url and is_file:
         source = check_file(source)  # download
+    
+    ################ bien phuc vu tinh density
+    sc_mask = None
+    sc_polygon_area = 0
+
+    ################ end
 
     # Directories
     save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
@@ -158,6 +162,8 @@ def run(
         # video 1/1 (1/60) /Users/khanhmac/Library/CloudStorage/OneDrive-nnl06/f0_thesis/thesis/yolov5/a1_data_test/output_video.mp4:
         
         sc_considering_frame += 1 # Khanh 2
+        sc_remaining_area = 0
+
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
             im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
@@ -192,6 +198,45 @@ def run(
             s += '%gx%g ' % im.shape[2:]  # print string
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             imc = im0.copy() if save_crop else im0  # for save_crop
+
+
+
+            ############################### Khanh 3
+            # create mask
+            sc_mask = np.zeros(im0.shape[:2])
+
+            # draw polygon
+            len_points = len(points)
+            for i_poly in range(min(len_points, 4)):
+                im0 = cv2.circle(im0, points[i_poly], 5, (0, 0, 255), -1)
+            if len_points >= 4:
+                im0 = cv2.polylines(im0, [np.int32(points[:4])], True, (0, 255, 0), thickness=2)
+                cv2.fillPoly(sc_mask, [np.int32(points[:4])], color=1)
+                if sc_polygon_area == 0:
+                    sc_polygon_area = np.sum(sc_mask)
+                # if len_points >= 8:
+                #      im0 = cv2.polylines(im0, [np.int32(points[4:8])], True, (255, 255, 0), thickness=2)
+
+            # bat dau dem so luong cho each class
+            if len(points) >= 4:
+                if sc_considering_frame % sc_frame2update == 0:
+                    number_names = [0] * len(names)
+                    for sc1 in det:
+                        sc_centroid = (xyxy2xywh(torch.tensor(sc1[:4]).view(1, 4))).view(-1).tolist()[:2]  # normalized xywh
+                        if isInside(points, sc_centroid):
+                            lbl_index = int(sc1[5])
+                            number_names[lbl_index] += 1
+
+            # background for showing parameters
+            cv2.rectangle(im0, (0, 0), (110, 100), (0,0,0), thickness=-1)
+
+            # show parameters
+            for sc2 in range(len(names)):
+                temp = names[sc2] + ": " + str(number_names[sc2])
+                cv2.putText(im0, temp, (10, 20 + sc2 *24), 0, 0.6, (255, 255, 255), thickness=1, lineType=cv2.LINE_AA)
+
+            ################################end
+
             annotator = Annotator(im0, line_width=line_thickness, example=str(names))
             if len(det):
                 # Rescale boxes from img_size to im0 size
@@ -219,6 +264,7 @@ def run(
                                 c = int(cls)  # integer class
                                 label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                                 annotator.box_label(xyxy, label, color=colors(c, True))
+                                cv2.rectangle(sc_mask, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), (0,), thickness=-1)
                     # else:
                     #     if save_img or save_crop or view_img:  # Add bbox to image
                     #         cv2.putText(im0, "ASDFSEW", (200, 200), 0, 0.6, (0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
@@ -231,50 +277,24 @@ def run(
             # Stream results
             im0 = annotator.result()
 
-            ############################### Khanh 3
-            # bat dau dem so luong cho each class
+            ########################## begin
+
             if len(points) >= 4:
-                if sc_considering_frame % sc_frame2update == 0:
-                    number_names = [0] * len(names)
-                    for sc1 in det:
-                        sc_centroid = (xyxy2xywh(torch.tensor(sc1[:4]).view(1, 4))).view(-1).tolist()[:2]  # normalized xywh
-                        if isInside(points, sc_centroid):
-                            lbl_index = int(sc1[5])
-                            number_names[lbl_index] += 1
+                # create pilot rate for drawing pie chart
+                sc_remaining_area = np.sum(sc_mask)
+                congestion_rate = 1 - sc_remaining_area / sc_polygon_area
 
-            # background for showing parameters
-            cv2.rectangle(im0, (0, 0), (110, 150), (0,0,0), thickness=-1)
+                # draw pie chart
+                values_chart = [congestion_rate, 1 - congestion_rate]
+                colors_chart = [(0, 0, 255), (0, 255, 0)]
+                start_angle = -90
+                for i_pie, value in enumerate(values_chart):
+                    end_angle = start_angle + value * 360
+                    cv2.ellipse(im0, (200, 50), (50, 50), 0, start_angle, end_angle, colors_chart[i_pie], -1)
+                    start_angle = end_angle
 
-            # show parameters
-            for sc2 in range(len(names)):
-                temp = names[sc2] + ": " + str(number_names[sc2])
-                cv2.putText(im0, temp, (10, 20 + sc2 *24), 0, 0.6, (255, 255, 255), thickness=1, lineType=cv2.LINE_AA)
-
-            # create pilot rate for drawing pie chart
-            congestion_rate = sum(number_names) / 15
-
-            # draw pie chart
-            values_chart = [congestion_rate, 1 - congestion_rate]
-            colors_chart = [(0, 0, 255), (0, 255, 0)]
-            start_angle = -90
-            for i_pie, value in enumerate(values_chart):
-                end_angle = start_angle + value * 360
-                cv2.ellipse(im0, (200, 50), (50, 50), 0, start_angle, end_angle, colors_chart[i_pie], -1)
-                start_angle = end_angle
-
-            # draw polygons
-            len_points = len(points)
-            for i_poly in range(min(len_points, 4)):
-                im0 = cv2.circle(im0, points[i_poly], 5, (0, 0, 255), -1)
-            if len_points >= 4:
-                im0 = cv2.polylines(im0, [np.int32(points[:4])], True, (0, 255, 0), thickness=2)
-            # if len_points >= 8:
-            #     im0 = cv2.polylines(im0, [np.int32(points[4:8])], True, (255, 255, 0), thickness=2)
-
-            #cv2.setMouseCallback(str(p), handle_left_click, points)
-
-            ################################
-
+            ########################## end
+            
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
