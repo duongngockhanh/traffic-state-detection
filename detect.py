@@ -37,10 +37,10 @@ import numpy as np
 
 import torch
 
-###################################### library added by Khanh
+###################################### begin01: library added by Khanh
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
-#######################################
+####################################### end01
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -55,7 +55,7 @@ from utils.general import (LOGGER, Profile, check_file, check_img_size, check_im
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, smart_inference_mode
 
-############################################ Khanh 0
+############################################ begin02
 
 # xu ly case that objects are in the polygon
 def isInside(points, centroid):
@@ -71,7 +71,7 @@ def handle_left_click(event, x, y, flag, points):
         temp = (x, y)
         points.append(temp)
 
-############################################
+############################################ end02
 
 @smart_inference_mode()
 def run(
@@ -112,11 +112,11 @@ def run(
     if is_url and is_file:
         source = check_file(source)  # download
     
-    ################ bien phuc vu tinh density
+    ################ begin03
     sc_mask = None
     sc_polygon_area = 0
 
-    ################ end
+    ################ end03
 
     # Directories
     save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
@@ -145,11 +145,11 @@ def run(
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
 
-    ######################## Khanh 1
+    ######################## begin04
     sc_considering_frame = -1 # frame dang xet
     sc_frame2update = 3 # sau 'sc_frame2update' frames thi se cap nhat mot lan
     number_names = [0] * len(names) # list chua so luong cua each class
-    ########################
+    ######################## end04
     
     for path, im, im0s, vid_cap, s in dataset:
         # print(path)
@@ -161,8 +161,10 @@ def run(
         # torch.Size([480, 852, 3])
         # video 1/1 (1/60) /Users/khanhmac/Library/CloudStorage/OneDrive-nnl06/f0_thesis/thesis/yolov5/a1_data_test/output_video.mp4:
         
-        sc_considering_frame += 1 # Khanh 2
+        ############################# begin05
+        sc_considering_frame += 1
         sc_remaining_area = 0
+        ############################# end05
 
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
@@ -199,9 +201,7 @@ def run(
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             imc = im0.copy() if save_crop else im0  # for save_crop
 
-
-
-            ############################### Khanh 3
+            ############################### begin06: draw polygon
             # create mask
             sc_mask = np.zeros(im0.shape[:2])
 
@@ -218,24 +218,9 @@ def run(
                 #      im0 = cv2.polylines(im0, [np.int32(points[4:8])], True, (255, 255, 0), thickness=2)
 
             # bat dau dem so luong cho each class
-            if len(points) >= 4:
-                if sc_considering_frame % sc_frame2update == 0:
-                    number_names = [0] * len(names)
-                    for sc1 in det:
-                        sc_centroid = (xyxy2xywh(torch.tensor(sc1[:4]).view(1, 4))).view(-1).tolist()[:2]  # normalized xywh
-                        if isInside(points, sc_centroid):
-                            lbl_index = int(sc1[5])
-                            number_names[lbl_index] += 1
+            number_names = [0] * len(names)
 
-            # background for showing parameters
-            cv2.rectangle(im0, (0, 0), (110, 100), (0,0,0), thickness=-1)
-
-            # show parameters
-            for sc2 in range(len(names)):
-                temp = names[sc2] + ": " + str(number_names[sc2])
-                cv2.putText(im0, temp, (10, 20 + sc2 *24), 0, 0.6, (255, 255, 255), thickness=1, lineType=cv2.LINE_AA)
-
-            ################################end
+            ################################ end06
 
             annotator = Annotator(im0, line_width=line_thickness, example=str(names))
             if len(det):
@@ -257,27 +242,41 @@ def run(
 
                     sc_centroid = (xyxy2xywh(torch.tensor(xyxy).view(1, 4))).view(-1).tolist()[:2]  # normalized xywh
 
-                    ########################## deal with ROI
+                    ########################## begin07: deal with ROI
                     if len(points) >= 4:
                         if isInside(points, sc_centroid):
                             if save_img or save_crop or view_img:  # Add bbox to image
                                 c = int(cls)  # integer class
                                 label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
+                                # print("aaaaaaa:",sc_centroid)
+                                # cv2.circle(im0, sc_centroid, 5, (0, 0, 255), -1)
                                 annotator.box_label(xyxy, label, color=colors(c, True))
                                 cv2.rectangle(sc_mask, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), (0,), thickness=-1)
+
+                                number_names[c] += 1
                     # else:
                     #     if save_img or save_crop or view_img:  # Add bbox to image
                     #         cv2.putText(im0, "ASDFSEW", (200, 200), 0, 0.6, (0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
                     #         c = int(cls)  # integer class
                     #         label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                     #         annotator.box_label(xyxy, label, color=colors(c, True))
+
+                    ########################## end07
                     if save_crop:
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
 
             # Stream results
             im0 = annotator.result()
 
-            ########################## begin
+            ########################## begin08: draw pie chart and show statistic
+
+            # background for showing parameters
+            cv2.rectangle(im0, (0, 0), (110, 100), (0,0,0), thickness=-1)
+
+            # show parameters
+            for sc2 in range(len(names)):
+                temp = names[sc2] + ": " + str(number_names[sc2])
+                cv2.putText(im0, temp, (10, 20 + sc2 *24), 0, 0.6, (255, 255, 255), thickness=1, lineType=cv2.LINE_AA)
 
             if len(points) >= 4:
                 # create pilot rate for drawing pie chart
@@ -293,7 +292,7 @@ def run(
                     cv2.ellipse(im0, (200, 50), (50, 50), 0, start_angle, end_angle, colors_chart[i_pie], -1)
                     start_angle = end_angle
 
-            ########################## end
+            ########################## end08
             
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
@@ -301,7 +300,11 @@ def run(
                     cv2.namedWindow(str(p), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
                     cv2.resizeWindow(str(p), im0.shape[1], im0.shape[0])
                 cv2.imshow(str(p), im0)
-                cv2.setMouseCallback(str(p), handle_left_click, points) ################################
+
+                ################################ begin09
+                cv2.setMouseCallback(str(p), handle_left_click, points)
+                ################################ end09
+
                 cv2.waitKey(1)  # 1 millisecond
 
             # Save results (image with detections)
