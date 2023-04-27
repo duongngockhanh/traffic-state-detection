@@ -71,6 +71,10 @@ def handle_left_click(event, x, y, flag, points):
         temp = (x, y)
         points.append(temp)
 
+# sigmoid
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
 ############################################ end02
 
 @smart_inference_mode()
@@ -248,11 +252,8 @@ def run(
                             if save_img or save_crop or view_img:  # Add bbox to image
                                 c = int(cls)  # integer class
                                 label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
-                                # print("aaaaaaa:",sc_centroid)
-                                # cv2.circle(im0, sc_centroid, 5, (0, 0, 255), -1)
                                 annotator.box_label(xyxy, label, color=colors(c, True))
                                 cv2.rectangle(sc_mask, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), (0,), thickness=-1)
-
                                 number_names[c] += 1
                     # else:
                     #     if save_img or save_crop or view_img:  # Add bbox to image
@@ -271,17 +272,19 @@ def run(
             ########################## begin08: draw pie chart and show statistic
 
             # background for showing parameters
-            cv2.rectangle(im0, (0, 0), (110, 100), (0,0,0), thickness=-1)
+            cv2.rectangle(im0, (0, 0), (220, 150), (0,0,0), thickness=-1)
 
             # show parameters
             for sc2 in range(len(names)):
                 temp = names[sc2] + ": " + str(number_names[sc2])
                 cv2.putText(im0, temp, (10, 20 + sc2 *24), 0, 0.6, (255, 255, 255), thickness=1, lineType=cv2.LINE_AA)
 
+            # draw pie chart
             if len(points) >= 4:
                 # create pilot rate for drawing pie chart
                 sc_remaining_area = np.sum(sc_mask)
                 congestion_rate = 1 - sc_remaining_area / sc_polygon_area
+                congestion_rate = sigmoid(congestion_rate * 20 - 10)
 
                 # draw pie chart
                 values_chart = [congestion_rate, 1 - congestion_rate]
@@ -289,9 +292,12 @@ def run(
                 start_angle = -90
                 for i_pie, value in enumerate(values_chart):
                     end_angle = start_angle + value * 360
-                    cv2.ellipse(im0, (200, 50), (50, 50), 0, start_angle, end_angle, colors_chart[i_pie], -1)
+                    cv2.ellipse(im0, (150, 60), (50, 50), 0, start_angle, end_angle, colors_chart[i_pie], -1)
                     start_angle = end_angle
 
+                # show percentage
+                congestion_percentage = "Congestion: " + str(round(congestion_rate * 100, 2)) + "%"
+                cv2.putText(im0, congestion_percentage, (10, 40 + len(names)*24), 0, 0.6, (255, 255, 255), thickness=1, lineType=cv2.LINE_AA)
             ########################## end08
             
             if view_img:
