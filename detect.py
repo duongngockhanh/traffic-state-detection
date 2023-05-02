@@ -284,8 +284,8 @@ def run(
                 # create pilot rate for drawing pie chart
                 sc_remaining_area = np.sum(sc_mask)
                 congestion_rate = 1 - sc_remaining_area / sc_polygon_area
-                congestion_rate = sigmoid(congestion_rate * 20 - 10)
-
+                congestion_rate = sigmoid((congestion_rate - 0.5) * 20)
+                
                 # draw pie chart
                 values_chart = [congestion_rate, 1 - congestion_rate]
                 colors_chart = [(0, 0, 255), (0, 255, 0)]
