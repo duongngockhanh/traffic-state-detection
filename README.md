@@ -35,7 +35,7 @@
 <p align="center">
 <img width="378" alt="image" src="https://github.com/duongngockhanh/traffic-state-detection/assets/87640587/58cc04bb-e194-40e4-b568-17ab6f72f5d7">
 </p>
-=> The ratio V/R is then mapped to a balanced scale and passed through a sigmoid function to distinguish more clearly between two states: congestion and normal.
+The ratio V/R is then mapped to a balanced scale and passed through a sigmoid function to distinguish more clearly between two states: congestion and normal.
 
 ### Result
 The result indicates a normal traffic state.
