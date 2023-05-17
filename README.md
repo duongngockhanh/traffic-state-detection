@@ -62,6 +62,6 @@ pip install -r requirements.txt
 
 ### Run
 ```commandline
-python detect.py --weights a2_weights/yolov5n_bigger_dataset.pt --source a1_video_test/v1_test.mp4 --view-img
+python detect.py --weights a2_weights/yolov5n_bigger_dataset.pt --source a1_video_test/video2.mp4 --view-img
 ```
 After that, proceed to mark the 4 points on the video to define the region of interest and observe the results.
