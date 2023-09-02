@@ -1,4 +1,4 @@
-# Congestion Detection
+# Traffic State Detection
 
 ## Object Detection
 
@@ -46,22 +46,3 @@ The result indicates a traffic congestion state.
 <p align="center">
 <img width="431" alt="image" src="https://github.com/duongngockhanh/traffic-state-detection/assets/87640587/e2f932d4-2b01-4c9b-88d7-7d7052e8de86">
  </p>
-
-## Installation
-
-### Installation
-```commandline
-pip install https://github.com/duongngockhanh/congestion-detection.git
-cd congestion-detection
-pip install -r requirements.txt
-```
-
-### Download the test data
-- The test data can be downloaded here: https://drive.google.com/drive/folders/14DErTVKrIr2MrVu8YtDE33cts0kTt6Bu
-- Then place the video file in the folder named **a1_video_test**.
-
-### Run
-```commandline
-python detect.py --weights a2_weights/yolov5n_bigger_dataset.pt --source a1_video_test/video2.mp4 --view-img
-```
-After that, proceed to mark the 4 points on the video to define the region of interest and observe the results.
