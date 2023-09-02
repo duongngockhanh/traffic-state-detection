@@ -1,4 +1,4 @@
-# Traffic State Detection
+# Congestion Detection
 
 ## Object Detection
 
@@ -51,8 +51,8 @@ The result indicates a traffic congestion state.
 
 ### Installation
 ```commandline
-pip install https://github.com/duongngockhanh/traffic-state-detection.git
-cd traffic-state-detection
+pip install https://github.com/duongngockhanh/congestion-detection.git
+cd congestion-detection
 pip install -r requirements.txt
 ```
 
