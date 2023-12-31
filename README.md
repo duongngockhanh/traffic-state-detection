@@ -1,4 +1,4 @@
-# Traffic State Detection
+<h1 align="center"> Traffic State Detection </h1> 
 
 ## Object Detection
 
@@ -11,7 +11,6 @@
 
 ### Configuration
 - Three models were trained: YOLOv5n, YOLOv7, and YOLOv8n, using pre-trained models available in open-source, with a training of 100 epochs on the same dataset.
-- YOLOv5n has a batch size of 32, while YOLOv7 and YOLOv8n have a batch size of 16.
 - They were trained on Google Colab with a GPU configuration of Tesla K80 and 12GB of RAM.
 - They were tested on a MacBook Pro 2015 with an Intel Core i5 Dual Core CPU and 16GB of RAM.
 
@@ -19,7 +18,6 @@
 | Model | params (M) | FLOPs (B) | Size | Speed (ms) | mAP@50 | mAP@50-95
 | --- | :---: | :---: | :---: | :---: | :---: | :---: |
 | YOLOv5n | 1.9 | 4.5 | 640 | 104.6 | 96.2% | 67.5% |
-| YOLOv7 | 36.9 | 104.7 | 640 | 1441.2 | 97.2% | 70.3% |
 | YOLOv8n | 3.2 | 8.7 | 640 | 178.3 | 96.8% | 70.9% |
 
 ## Congestion Classification
